@@ -122,18 +122,20 @@ export default {
           this.movies.push(movie)
         })
       } catch (error) {
-        alert(`Error ${error}`)
-      } finally {
+        console.log(`Error ${error}`)
       }
     },
     async searchMovies() {
-      const responseSearchedMovies = await axios.get(
-        `https://api.themoviedb.org/3/search/movie?api_key=aafd5624e29d6f2b8ceb629bd5243be0&language=en-US&query=${this.searchInput}&page=1&include_adult=false`
-      )
-      responseSearchedMovies.data.results.forEach((movie) => {
-        this.searchedMovies.push(movie)
-      })
-      console.log(this.searchedMovies)
+      try {
+        const responseSearchedMovies = await axios.get(
+          `https://api.themoviedb.org/3/search/movie?api_key=aafd5624e29d6f2b8ceb629bd5243be0&language=en-US&query=${this.searchInput}&page=1&include_adult=false`
+        )
+        responseSearchedMovies.data.results.forEach((movie) => {
+          this.searchedMovies.push(movie)
+        })
+      } catch (error) {
+        console.log(`Error ${error}`)
+      }
     },
     clearSearch() {
       this.searchedMovies = []

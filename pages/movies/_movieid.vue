@@ -95,15 +95,19 @@ import Loading from '../Loading.vue'
 export default {
   components: { Loading },
   name: 'single-movie',
+  head() {
+    return {
+      title: this.movie.title,
+    }
+  },
   data() {
     return {
-      movie: null,
+      movie: '',
     }
   },
 
   async fetch() {
     await this.getSingleMovie()
-
   },
   fetchDelay: 300,
 

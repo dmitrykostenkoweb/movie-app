@@ -96,6 +96,12 @@
 import axios from 'axios'
 import Loading from './Loading.vue'
 export default {
+  head() {
+    return {
+      title: 'Movie App - Latest Streaming Movie Info ',
+      meta: [{ hid: 'description', name: 'description', content: 'movies' }],
+    }
+  },
   components: { Loading },
   data() {
     return {

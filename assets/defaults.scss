@@ -17,9 +17,11 @@
 .page-leave-to {
   opacity: 0;
 }
+body {
+  background-color: #211f1f;
+}
 
 .app {
-  background-color: #211f1f;
   min-height: 100vh;
 }
 
@@ -52,5 +54,13 @@
 .container {
   max-width: 1400px;
   margin: 0 auto;
+  z-index: 10;
 }
 
+img {
+  border-radius: 8px;
+}
+a {
+  color: white;
+  text-decoration: none;
+}

@@ -87,6 +87,7 @@
           </div>
         </div>
       </div>
+      <div ref="observer" class="observer"></div>
     </div>
   </div>
 </template>
@@ -101,6 +102,7 @@ export default {
       movies: [],
       searchedMovies: [],
       searchInput: '',
+      page: 1,
     }
   },
   async fetch() {
@@ -112,11 +114,14 @@ export default {
     await this.searchMovies()
   },
   fetchDelay: 300,
+  mounted() {
+    this.getMoreMovies()
+  },
   methods: {
     async getMovies() {
       try {
         const responseMovies = await axios.get(
-          `https://api.themoviedb.org/3/movie/now_playing?api_key=aafd5624e29d6f2b8ceb629bd5243be0&language=en-US&page=1`
+          `https://api.themoviedb.org/3/movie/now_playing?api_key=aafd5624e29d6f2b8ceb629bd5243be0&language=en-US&page=${this.page}`
         )
         responseMovies.data.results.forEach((movie) => {
           this.movies.push(movie)
@@ -140,6 +145,21 @@ export default {
     clearSearch() {
       this.searchedMovies = []
       this.searchInput = ''
+    },
+    getMoreMovies() {
+      // observer
+      const options = {
+        rootMargin: '0px',
+        threshold: 1.0,
+      }
+      const callback = (entries, observer) => {
+        if (entries[0].isIntersecting) {
+          this.page += 1
+          this.getMovies()
+        }
+      }
+      const observer = new IntersectionObserver(callback, options)
+      observer.observe(this.$refs.observer)
     },
   },
 }
@@ -242,4 +262,10 @@ export default {
     }
   }
 }
+
+// .observer {
+//   width: 100%;
+//   height: 50px;
+//   background-color: #c92502;
+// }
 </style>

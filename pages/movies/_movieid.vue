@@ -3,7 +3,16 @@
   <Loading v-if="$fetchState.pending" />
 
   <!-- Movie Info -->
+
   <div v-else class="single-movie container">
+    <div class="background">
+      <img
+        class="background-img"
+        :src="`https://image.tmdb.org/t/p/original/${movie.backdrop_path}`"
+        alt=""
+      />
+    </div>
+
     <NuxtLink class="button" :to="{ name: 'index' }"> Back </NuxtLink>
     <div class="movie-info">
       <div class="movie-img">
@@ -13,10 +22,25 @@
         />
       </div>
       <div class="movie-content">
-        <h1>Title: {{ movie.title }}</h1>
-        <p class="movie-fact tagline">
+        <!-- Title -->
+        <h1>
+          <a target="_blank" :href="movie.homepage">{{ movie.title }} </a>
+        </h1>
+
+        <!-- Tagline -->
+        <p v-if="movie.tagline" class="movie-fact tagline">
           <span>Tagline:</span> "{{ movie.tagline }}"
         </p>
+
+        <!-- Genres -->
+        <div class="movie-fact">
+          <span>Genres:</span>
+          <div v-for="(genr, id) in movie.genres" :key="id">
+            {{ genr.name }},
+          </div>
+        </div>
+
+        <!-- Released -->
         <p class="movie-fact">
           <span>Released:</span>
           {{
@@ -27,9 +51,24 @@
             })
           }}
         </p>
+
+        <!-- Duration -->
         <p class="movie-fact">
           <span>Duration:</span> {{ movie.runtime }} minutes
         </p>
+
+        <!-- Budget -->
+        <p class="movie-fact">
+          <span>Budget:</span>
+          {{
+            movie.budget.toLocaleString('en-us', {
+              style: 'currency',
+              currency: 'USD',
+            })
+          }}
+        </p>
+
+        <!-- Revenue -->
         <p class="movie-fact">
           <span>Revenue:</span>
           {{
@@ -39,7 +78,12 @@
             })
           }}
         </p>
-        <p class="movie-fact"><span>Overview:</span> {{ movie.overview }}</p>
+
+        <!-- Overview -->
+        <p class="movie-fact">
+          <span>Overview:</span>
+          {{ movie.overview }}
+        </p>
       </div>
     </div>
   </div>
@@ -59,6 +103,7 @@ export default {
 
   async fetch() {
     await this.getSingleMovie()
+
   },
   fetchDelay: 300,
 
@@ -82,7 +127,26 @@ export default {
 </script>
 
 <style lang="scss">
+.background {
+  position: relative;
+  min-width: 100%;
+  min-height: auto;
+  z-index: -5;
+  opacity: 0.2;
+}
+
+.background-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -10%);
+  width: 120%;
+  height: auto;
+  object-fit: contain;
+}
+
 .single-movie {
+  z-index: 20;
   color: #fff;
   min-height: 100vh;
   display: flex;
@@ -119,12 +183,15 @@ export default {
         font-weight: 400;
       }
       .movie-fact {
+        display: flex;
+        column-gap: 50px;
+        flex-wrap: wrap;
         margin-top: 12px;
         font-size: 20px;
         line-height: 1.5;
         span {
-          font-weight: 600;
-          text-decoration: underline;
+          font-weight: 200;
+          color: #c92502;
         }
       }
       .tagline {

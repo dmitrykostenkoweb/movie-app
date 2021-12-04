@@ -1,7 +1,8 @@
 <template>
   <div class="home">
+    <app-bar v-on:navClick="selectNav" />
     <!-- Hero -->
-    <Hero />
+    <Hero :title="selectedNav" />
     <!-- Search -->
     <div class="container search">
       <input
@@ -9,6 +10,7 @@
         type="text"
         v-model.lazy="searchInput"
         placeholder="Search"
+        @focus="clearSearch"
       />
       <button @click="clearSearch" v-show="searchInput !== ''" class="button">
         Clear Search
@@ -16,8 +18,10 @@
     </div>
     <!-- loading -->
     <loading v-if="$fetchState.pending" />
+    <!-- Error Message -->
+    <error-message :message="errorMessage" v-if="errorMessage !== ''" />
     <!-- Movies -->
-    <div class="container movies">
+    <div v-else class="container movies">
       <!--Searched Movies -->
       <movie-list-view v-if="searchInput !== ''" :movies="searchedMovies" />
 
@@ -33,6 +37,8 @@
 import axios from 'axios'
 import Loading from './Loading.vue'
 import MovieListView from '../components/movieListView.vue'
+import AppBar from '../components/AppBar.vue'
+import ErrorMessage from '../components/ErrorMessage.vue'
 export default {
   head() {
     return {
@@ -40,13 +46,17 @@ export default {
       meta: [{ hid: 'description', name: 'description', content: 'movies' }],
     }
   },
-  components: { Loading, MovieListView },
+  components: { Loading, MovieListView, AppBar, ErrorMessage },
   data() {
     return {
       movies: [],
       searchedMovies: [],
       searchInput: '',
       page: 1,
+      selectedNav: 'Now playing',
+      apiKey: 'aafd5624e29d6f2b8ceb629bd5243be0',
+      apiPart: 'now_playing',
+      errorMessage: '',
     }
   },
   async fetch() {
@@ -63,34 +73,48 @@ export default {
   },
   methods: {
     async getMovies() {
+      this.errorMessage = ''
+
       try {
         const responseMovies = await axios.get(
-          `https://api.themoviedb.org/3/movie/now_playing?api_key=aafd5624e29d6f2b8ceb629bd5243be0&language=en-US&page=${this.page}`
+          `https://api.themoviedb.org/3/movie/${this.apiPart}?api_key=${this.apiKey}&language=en-US&page=${this.page}`
         )
         responseMovies.data.results.forEach((movie) => {
           this.movies.push(movie)
         })
       } catch (error) {
         console.log(`Error ${error}`)
+        this.errorMessage = 'Something wrong 😕'
+      } finally {
+        if (this.movies.length === 0) {
+          this.errorMessage = 'Something wrong 😕'
+        }
       }
     },
     async searchMovies() {
-      this.searchedMovies = []
+      this.page = 1
+      this.errorMessage = ''
 
       try {
         const responseSearchedMovies = await axios.get(
-          `https://api.themoviedb.org/3/search/movie?api_key=aafd5624e29d6f2b8ceb629bd5243be0&language=en-US&query=${this.searchInput}&page=1&include_adult=false`
+          `https://api.themoviedb.org/3/search/movie?api_key=${this.apiKey}&language=en-US&query=${this.searchInput}&page=${this.page}&include_adult=false`
         )
         responseSearchedMovies.data.results.forEach((movie) => {
           this.searchedMovies.push(movie)
         })
       } catch (error) {
         console.log(`Error ${error}`)
+        this.errorMessage = 'Something wrong 😕'
+      } finally {
+        if (this.searchedMovies.length === 0) {
+          this.errorMessage = 'No results 😕'
+        }
       }
     },
     clearSearch() {
       this.searchedMovies = []
       this.searchInput = ''
+      this.errorMessage = ''
     },
     getMoreMovies() {
       // observer
@@ -101,11 +125,22 @@ export default {
       const callback = (entries, observer) => {
         if (entries[0].isIntersecting) {
           this.page += 1
-          this.getMovies()
+          this.$fetch()
         }
       }
       const observer = new IntersectionObserver(callback, options)
       observer.observe(this.$refs.observer)
+    },
+    selectNav(nav) {
+      this.selectedNav = nav
+      this.movies = []
+      this.page = 1
+      this.changeApi()
+    },
+    changeApi() {
+      this.apiPart = this.selectedNav.toLowerCase().replace(/ /g, '_')
+      console.log(this.apiPart)
+      this.$fetch()
     },
   },
 }

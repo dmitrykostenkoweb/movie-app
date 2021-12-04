@@ -95,7 +95,7 @@ import Loading from '../Loading.vue'
 export default {
   components: { Loading },
   name: 'single-movie',
-  head() {
+   head() {
     return {
       title: this.movie.title,
     }
